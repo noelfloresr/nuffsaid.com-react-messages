@@ -25,3 +25,14 @@
   width: 100%;
   gap: 20px;
 }
+
+.clearButtonContainer {
+  display: flex;
+  justify-content: flex-end;
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+}

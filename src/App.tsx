@@ -33,6 +33,27 @@ const App: React.FC<{}> = () => {
   const [errorMessages, setErrorMessages] = useState<Message[]>([]);
   const [warningMessages, setWarningMessages] = useState<Message[]>([]);
   const [infoMessages, setInfoMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingLabel, setLoadingLabel] = useState("Stop");
+
+  useEffect(() => {
+    if (isLoading) {
+      const cleanUp = generateMessage((message: Message) => {
+        switch (message.priority) {
+          case 0:
+            setErrorMessages((oldMessages) => [...oldMessages, message]);
+            break;
+          case 1:
+            setWarningMessages((oldMessages) => [...oldMessages, message]);
+            break;
+          case 2:
+            setInfoMessages((oldMessages) => [...oldMessages, message]);
+            break;
+        }
+      });
+      return cleanUp;
+    }
+  }, [setErrorMessages, setWarningMessages, setInfoMessages, isLoading]);
 
   const handleClear = () => {
     setErrorMessages([]);
@@ -40,30 +61,37 @@ const App: React.FC<{}> = () => {
     setInfoMessages([]);
   };
 
-  useEffect(() => {
-    const cleanUp = generateMessage((message: Message) => {
-      switch (message.priority) {
-        case 0:
-          setErrorMessages((oldMessages) => [...oldMessages, message]);
-          break;
-        case 1:
-          setWarningMessages((oldMessages) => [...oldMessages, message]);
-          break;
-        case 2:
-          setInfoMessages((oldMessages) => [...oldMessages, message]);
-          break;
-      }
-      // setMessages((oldMessages) => [...oldMessages, message]);
-    });
-    return cleanUp;
-  }, [setErrorMessages, setWarningMessages, setInfoMessages]);
+  const handleLoading = () => {
+    isLoading ? setLoadingLabel("Play") : setLoadingLabel("Stop");
+    isLoading ? setIsLoading(false) : setIsLoading(true);
+  };
+
+  const handleRemoveMessage = (message: string, priority: number) => {
+    switch (priority) {
+      case 0:
+        setErrorMessages(
+          errorMessages.filter((msg) => msg.message !== message)
+        );
+        break;
+      case 1:
+        setWarningMessages(
+          warningMessages.filter((msg) => msg.message !== message)
+        );
+        break;
+      case 2:
+        setInfoMessages(infoMessages.filter((msg) => msg.message !== message));
+        break;
+    }
+  };
 
   return (
     <div className={styles.container}>
       <h1>nuffsaid.com Coding Challenge</h1>
       <hr></hr>
       <div className={styles.actionButtons}>
-        <button style={actionButton}>Stop</button>
+        <button style={actionButton} onClick={handleLoading}>
+          {loadingLabel}
+        </button>
         <button style={actionButton} onClick={handleClear}>
           Clear
         </button>
@@ -74,7 +102,18 @@ const App: React.FC<{}> = () => {
           <span>Count {errorMessages.length}</span>
           {errorMessages?.map?.((msg) => (
             <Card style={cardError} key={msg?.message}>
-              <CardContent>{msg?.message}</CardContent>
+              <CardContent>
+                {msg?.message}
+                <div className={styles.clearButtonContainer}>
+                  <button
+                    onClick={() =>
+                      handleRemoveMessage(msg?.message, msg?.priority)
+                    }
+                  >
+                    Clear
+                  </button>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
@@ -83,7 +122,18 @@ const App: React.FC<{}> = () => {
           <span>Count {warningMessages.length}</span>
           {warningMessages?.map?.((msg) => (
             <Card style={cardWarning} key={msg?.message}>
-              <CardContent>{msg?.message}</CardContent>
+              <CardContent>
+                {msg?.message}
+                <div className={styles.clearButtonContainer}>
+                  <button
+                    onClick={() =>
+                      handleRemoveMessage(msg?.message, msg?.priority)
+                    }
+                  >
+                    Clear
+                  </button>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
@@ -92,7 +142,18 @@ const App: React.FC<{}> = () => {
           <span>Count {infoMessages.length}</span>
           {infoMessages?.map?.((msg) => (
             <Card style={cardInfo}>
-              <CardContent>{msg?.message}</CardContent>
+              <CardContent>
+                {msg?.message}
+                <div className={styles.clearButtonContainer}>
+                  <button
+                    onClick={() =>
+                      handleRemoveMessage(msg?.message, msg?.priority)
+                    }
+                  >
+                    Clear
+                  </button>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
