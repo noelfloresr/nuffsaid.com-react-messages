@@ -4,6 +4,10 @@ import generateMessage, { Message } from "./Api";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import styles from "./App.module.scss";
+import Snackbar from "@mui/material/Snackbar";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import CloseIcon from "@mui/icons-material/Close";
 
 const cardRow: CSSProperties = {
   flex: 1,
@@ -35,6 +39,7 @@ const App: React.FC<{}> = () => {
   const [infoMessages, setInfoMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingLabel, setLoadingLabel] = useState("Stop");
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
 
   useEffect(() => {
     if (isLoading) {
@@ -42,6 +47,7 @@ const App: React.FC<{}> = () => {
         switch (message.priority) {
           case 0:
             setErrorMessages((oldMessages) => [...oldMessages, message]);
+            setOpenSnackbar(true);
             break;
           case 1:
             setWarningMessages((oldMessages) => [...oldMessages, message]);
@@ -83,6 +89,33 @@ const App: React.FC<{}> = () => {
         break;
     }
   };
+
+  const handleClose = (
+    event: React.SyntheticEvent | React.MouseEvent,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnackbar(false);
+  };
+
+  const action = (
+    <React.Fragment>
+      <Button color="secondary" size="small" onClick={handleClose}>
+        UNDO
+      </Button>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleClose}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </React.Fragment>
+  );
 
   return (
     <div className={styles.container}>
@@ -141,7 +174,7 @@ const App: React.FC<{}> = () => {
           <h2>Error type 3</h2>
           <span>Count {infoMessages.length}</span>
           {infoMessages?.map?.((msg) => (
-            <Card style={cardInfo}>
+            <Card style={cardInfo} key={msg?.message}>
               <CardContent>
                 {msg?.message}
                 <div className={styles.clearButtonContainer}>
@@ -158,6 +191,13 @@ const App: React.FC<{}> = () => {
           ))}
         </div>
       </div>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        message="Note archived"
+        action={action}
+      />
     </div>
   );
 };
